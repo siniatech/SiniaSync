@@ -3,11 +3,11 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>com.siniatech</groupId>
-	<artifactId>siniasync</artifactId>
+	<artifactId>siniasync-test</artifactId>
 	<version>0.1-SNAPSHOT</version>
 	<packaging>jar</packaging>
 
-	<name>siniasync</name>
+	<name>siniasync-test</name>
 	<url>http://maven.apache.org</url>
 
 	<properties>
@@ -23,10 +23,8 @@
 		</dependency>
 		<dependency>
 			<groupId>com.siniatech</groupId>
-			<artifactId>siniautils</artifactId>
+			<artifactId>siniasync</artifactId>
 			<version>0.1-SNAPSHOT</version>
 		</dependency>
 	</dependencies>
-
-
 </project>
