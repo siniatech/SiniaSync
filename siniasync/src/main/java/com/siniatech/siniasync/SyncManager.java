@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.siniatech.siniasync.change.FileContentsChange;
 import com.siniatech.siniasync.change.FileMissingChange;
 import com.siniatech.siniasync.change.FileTypeChange;
 import com.siniatech.siniasync.change.IChange;

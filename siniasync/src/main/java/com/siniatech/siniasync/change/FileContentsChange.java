@@ -1,8 +1,7 @@
-package com.siniatech.siniasync;
+package com.siniatech.siniasync.change;
 
 import java.nio.file.Path;
 
-import com.siniatech.siniasync.change.IChange;
 
 public class FileContentsChange implements IChange {
 
