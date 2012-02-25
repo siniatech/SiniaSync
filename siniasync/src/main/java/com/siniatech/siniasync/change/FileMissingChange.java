@@ -1,8 +1,18 @@
 package com.siniatech.siniasync.change;
 
-import java.nio.file.Path;
+import static java.nio.file.FileVisitResult.*;
+import static java.nio.file.Files.*;
 
-public class FileMissingChange implements IChange {
+import java.io.IOException;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Path;
+import java.nio.file.SimpleFileVisitor;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.util.Collections;
+
+import com.siniatech.siniasync.monitor.IProgressMonitor;
+
+public class FileMissingChange extends Change {
 
     private final Path missingFile;
     private final Path missingInDirectory;
@@ -41,6 +51,32 @@ public class FileMissingChange implements IChange {
         } else if ( !missingInDirectory.equals( other.missingInDirectory ) )
             return false;
         return true;
+    }
+
+    public void apply( final IProgressMonitor... monitors ) {
+        try {
+            final Path parent = missingFile.getParent();
+            walkFileTree( missingFile, Collections.EMPTY_SET, Integer.MAX_VALUE, new SimpleFileVisitor<Path>() {
+                @Override
+                public FileVisitResult preVisitDirectory( Path dir, BasicFileAttributes attrs ) throws IOException {
+                    return copyAndReport( dir, monitors );
+                }
+
+                @Override
+                public FileVisitResult visitFile( Path file, BasicFileAttributes attrs ) throws IOException {
+                    return copyAndReport( file, monitors );
+                }
+
+                private FileVisitResult copyAndReport( Path file, final IProgressMonitor... monitors ) throws IOException {
+                    Path target = missingInDirectory.resolve( parent.relativize( file ) );
+                    copy( file, target );
+                    report( "Copied " + file + " to " + target, monitors );
+                    return CONTINUE;
+                }
+            } );
+        } catch ( IOException e ) {
+            report( "Failed to copy " + missingFile.getFileName() + "\n" + e, monitors );
+        }
     }
 
 }

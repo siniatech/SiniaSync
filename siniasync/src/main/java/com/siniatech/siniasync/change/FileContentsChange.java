@@ -2,6 +2,8 @@ package com.siniatech.siniasync.change;
 
 import java.nio.file.Path;
 
+import com.siniatech.siniasync.monitor.IProgressMonitor;
+
 
 public class FileContentsChange implements IChange {
 
@@ -42,6 +44,11 @@ public class FileContentsChange implements IChange {
         } else if ( !p2.equals( other.p2 ) )
             return false;
         return true;
+    }
+
+    public void apply( IProgressMonitor... monitors ) {
+        // TODO Auto-generated method stub
+        
     }
 
 }

@@ -27,7 +27,7 @@ public class TestSyncManagerChanges {
     public SyncManager syncManager = new SyncManager();
 
     private String pathString( String filename ) {
-        return folder.getRoot().getAbsolutePath() + File.pathSeparator + filename;
+        return folder.getRoot().getAbsolutePath() + File.separator + filename;
     }
 
     @Test
