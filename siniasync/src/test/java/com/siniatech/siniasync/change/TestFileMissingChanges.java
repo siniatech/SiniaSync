@@ -20,7 +20,7 @@ public class TestFileMissingChanges {
     private String pathString( String filename ) {
         return folder.getRoot().getAbsolutePath() + File.separator + filename;
     }
-
+    
     @Test
     public void testMissingFile() throws Exception {
         Path p = createFileWithContents( pathString( "f" ), "hello" );
@@ -66,4 +66,30 @@ public class TestFileMissingChanges {
         assertTrue( exists( res ) );
         assertEquals( sha1( p ), sha1( res ) );
     }
+
+    @Test
+    public void testHandlesDodgyFile() throws Exception {
+        Path p = FileSystems.getDefault().getPath( pathString( "f" ) );
+        Path d = createDirectory( FileSystems.getDefault().getPath( pathString( "d" ) ) );
+        Path res = FileSystems.getDefault().getPath( pathString( "d/f" ) );
+        assertFalse( exists( p ) );
+        assertFalse( exists( res ) );
+        new FileMissingChange( p, d ).apply();
+        assertFalse( exists( p ) );
+        assertFalse( exists( res ) );
+    }
+    
+    @Test
+    public void testHandlesDodgyDirectory() throws Exception {
+        Path p = createFileWithContents( pathString( "f" ), "hello" );
+        Path d = FileSystems.getDefault().getPath( pathString( "d" ) );
+        Path res = FileSystems.getDefault().getPath( pathString( "d/f" ) );
+        assertFalse( exists( d ) );
+        assertFalse( exists( res ) );
+        new FileMissingChange( p, d ).apply();
+        assertFalse( exists( d ) );
+        assertFalse( exists( res ) );
+    }
+
+
 }

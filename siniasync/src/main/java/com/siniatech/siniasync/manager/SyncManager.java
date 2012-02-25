@@ -1,4 +1,4 @@
-package com.siniatech.siniasync;
+package com.siniatech.siniasync.manager;
 
 import static com.siniatech.siniautils.file.PathHelper.*;
 import static java.nio.file.Files.*;

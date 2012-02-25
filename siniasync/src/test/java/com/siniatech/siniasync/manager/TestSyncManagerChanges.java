@@ -1,4 +1,4 @@
-package com.siniatech.siniasync;
+package com.siniatech.siniasync.manager;
 
 import static com.siniatech.siniautils.file.PathHelper.*;
 import static com.siniatech.siniautils.list.ListHelper.*;
@@ -18,6 +18,7 @@ import com.siniatech.siniasync.change.FileContentsChange;
 import com.siniatech.siniasync.change.FileMissingChange;
 import com.siniatech.siniasync.change.FileTypeChange;
 import com.siniatech.siniasync.change.IChange;
+import com.siniatech.siniasync.manager.SyncManager;
 
 public class TestSyncManagerChanges {
 
