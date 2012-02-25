@@ -12,6 +12,8 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
+import com.siniatech.siniasync.monitor.CountingProgressMonitor;
+
 public class TestFileMissingChanges {
 
     @Rule
@@ -20,7 +22,7 @@ public class TestFileMissingChanges {
     private String pathString( String filename ) {
         return folder.getRoot().getAbsolutePath() + File.separator + filename;
     }
-    
+
     @Test
     public void testMissingFile() throws Exception {
         Path p = createFileWithContents( pathString( "f" ), "hello" );
@@ -78,7 +80,7 @@ public class TestFileMissingChanges {
         assertFalse( exists( p ) );
         assertFalse( exists( res ) );
     }
-    
+
     @Test
     public void testHandlesDodgyDirectory() throws Exception {
         Path p = createFileWithContents( pathString( "f" ), "hello" );
@@ -91,5 +93,33 @@ public class TestFileMissingChanges {
         assertFalse( exists( res ) );
     }
 
+    @Test
+    public void testReportsError() throws Exception {
+        Path p = createFileWithContents( pathString( "f" ), "hello" );
+        Path d = FileSystems.getDefault().getPath( pathString( "d" ) );
+        CountingProgressMonitor monitor = new CountingProgressMonitor();
+        new FileMissingChange( p, d ).apply( monitor );
+        assertEquals( 1, monitor.getCount() );
+    }
+
+    @Test
+    public void testReportsSingleCopy() throws Exception {
+        Path p = createFileWithContents( pathString( "f" ), "hello" );
+        Path d = createDirectory( FileSystems.getDefault().getPath( pathString( "d" ) ) );
+        CountingProgressMonitor monitor = new CountingProgressMonitor();
+        new FileMissingChange( p, d ).apply( monitor );
+        assertEquals( 1, monitor.getCount() );
+    }
+
+    @Test
+    public void testReportsMultipleCopies() throws Exception {
+        Path d1 = createDirectory( FileSystems.getDefault().getPath( pathString( "d1" ) ) );
+        Path d2 = createDirectory( FileSystems.getDefault().getPath( pathString( "d2" ) ) );
+        createDirectory( FileSystems.getDefault().getPath( pathString( "d1/d3" ) ) );
+        createFileWithContents( pathString( "d1/d3/f" ), "hello" );
+        CountingProgressMonitor monitor = new CountingProgressMonitor();
+        new FileMissingChange( d1, d2 ).apply( monitor );
+        assertEquals( 3, monitor.getCount() );
+    }
 
 }
