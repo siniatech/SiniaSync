@@ -47,6 +47,7 @@
 				<artifactId>jacoco-maven-plugin</artifactId>
 				<version>0.5.6.201201232323</version>
 				<executions>
+					<!-- SIF - Eclipse marks this as an error, but it works fine! -->
 					<execution>
 						<goals>
 							<goal>prepare-agent</goal>

@@ -6,6 +6,7 @@ import static junit.framework.Assert.*;
 import java.lang.reflect.Constructor;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -18,6 +19,7 @@ import com.siniatech.siniasync.change.FileMissingChange;
 import com.siniatech.siniasync.change.FileTypeChange;
 import com.siniatech.siniautils.fn.IFunction0;
 import com.siniatech.siniautils.fn.IResponse1;
+import com.siniatech.siniautils.fn.IResponse2;
 
 public class TestHashCodeAndEquals {
 
@@ -31,10 +33,12 @@ public class TestHashCodeAndEquals {
     @SuppressWarnings("rawtypes")
     private static Map<Class, IFunction0> mockClasses = new HashMap<Class, IFunction0>();
 
+    static long seq = 0;
+
     static {
         mockClasses.put( Path.class, new IFunction0<Path>() {
             public Path apply() {
-                return FileSystems.getDefault().getPath( "f" );
+                return FileSystems.getDefault().getPath( "f" + seq++ );
             }
         } );
     }
@@ -43,6 +47,48 @@ public class TestHashCodeAndEquals {
         for ( Class<?> clazz : classesToTest ) {
             response.respond( instantiate( clazz ) );
         }
+    }
+
+    private void visitClassesWithDiffConstructorParams( IResponse2<Object, Object> response ) throws Exception {
+        for ( Class<?> clazz : classesToTest ) {
+            response.respond( instantiate( clazz ), instantiate( clazz ) );
+        }
+    }
+
+    private void visitClassesWithNullConstructorParamsOneSide( IResponse2<Object, Object> response ) throws Exception {
+        for ( Class<?> clazz : classesToTest ) {
+            Object stdObj = instantiate( clazz );
+            for ( Object objWithNulls : instantiateWithNulls( clazz ) ) {
+                response.respond( objWithNulls, stdObj );
+            }
+        }
+    }
+
+    private void visitClassesWithNullConstructorParamsBothSides( IResponse2<Object, Object> response ) throws Exception {
+        for ( Class<?> clazz : classesToTest ) {
+            for ( Object objWithNulls : instantiateWithNulls( clazz ) ) {
+                response.respond( objWithNulls, objWithNulls );
+            }
+        }
+    }
+
+    private List<Object> instantiateWithNulls( Class<?> clazz ) throws Exception {
+        assert !mockClasses.containsKey( clazz );
+        Constructor<?> constructor = clazz.getConstructors()[0];
+        Class<?>[] parameterTypes = constructor.getParameterTypes();
+        List<Object> objs = new ArrayList<Object>();
+        for ( int i = 0; i < parameterTypes.length; i++ ) {
+            objs.add( constructor.newInstance( instantiateWithNullAt( parameterTypes, i ) ) );
+        }
+        return objs;
+    }
+
+    private Object[] instantiateWithNullAt( Class<?>[] parameterTypes, int nullAt ) throws Exception {
+        Object[] parameters = new Object[parameterTypes.length];
+        for ( int i = 0; i < parameterTypes.length; i++ ) {
+            parameters[i] = i == nullAt ? null : instantiate( parameterTypes[i] );
+        }
+        return parameters;
     }
 
     private Object[] instantiate( Class<?>[] parameterTypes ) throws Exception {
@@ -91,12 +137,57 @@ public class TestHashCodeAndEquals {
     }
 
     @Test
+    public void testEqualsWithNullParamsOneSide() throws Exception {
+        visitClassesWithNullConstructorParamsOneSide( new IResponse2<Object, Object>() {
+            public void respond( Object t, Object u ) {
+                assertFalse( t.equals( u ) );
+            }
+        } );
+    }
+
+    @Test
+    public void testEqualsWithDiffConstructorParams() throws Exception {
+        visitClassesWithDiffConstructorParams( new IResponse2<Object, Object>() {
+            public void respond( Object t, Object u ) {
+                assertFalse( t.equals( u ) );
+            }
+        } );
+    }
+
+    @Test
+    public void testEqualsWithNullParamsBothSides() throws Exception {
+        visitClassesWithNullConstructorParamsBothSides( new IResponse2<Object, Object>() {
+            public void respond( Object t, Object u ) {
+                assertTrue( t.equals( u ) );
+            }
+        } );
+    }
+
+    @Test
     public void testHashCode() throws Exception {
         visitClasses( new IResponse1<Object>() {
             public void respond( Object t ) {
                 assertNotEquals( 0, t.hashCode() );
                 assertNotEquals( 1, t.hashCode() );
                 assertEquals( t.hashCode(), t.hashCode() );
+            }
+        } );
+    }
+
+    @Test
+    public void testHashCodeWithNullParamsOneSide() throws Exception {
+        visitClassesWithNullConstructorParamsOneSide( new IResponse2<Object, Object>() {
+            public void respond( Object t, Object u ) {
+                assertNotEquals( t.hashCode(), u.hashCode() );
+            }
+        } );
+    }
+
+    @Test
+    public void testHashCodeWithNullParamsBothSides() throws Exception {
+        visitClassesWithNullConstructorParamsBothSides( new IResponse2<Object, Object>() {
+            public void respond( Object t, Object u ) {
+                assertEquals( t.hashCode(), u.hashCode() );
             }
         } );
     }
