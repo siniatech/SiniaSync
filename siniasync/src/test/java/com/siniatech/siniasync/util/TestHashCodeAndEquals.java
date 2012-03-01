@@ -20,6 +20,8 @@ import com.siniatech.siniasync.change.FileTypeChange;
 import com.siniatech.siniautils.fn.IFunction0;
 import com.siniatech.siniautils.fn.IResponse1;
 import com.siniatech.siniautils.fn.IResponse2;
+import com.siniatech.siniautils.fn.ITuple2;
+import com.siniatech.siniautils.fn.Tuples;
 
 public class TestHashCodeAndEquals {
 
@@ -64,14 +66,6 @@ public class TestHashCodeAndEquals {
         }
     }
 
-    private void visitClassesWithNullConstructorParamsBothSides( IResponse2<Object, Object> response ) throws Exception {
-        for ( Class<?> clazz : classesToTest ) {
-            for ( Object objWithNulls : instantiateWithNulls( clazz ) ) {
-                response.respond( objWithNulls, objWithNulls );
-            }
-        }
-    }
-
     private List<Object> instantiateWithNulls( Class<?> clazz ) throws Exception {
         assert !mockClasses.containsKey( clazz );
         Constructor<?> constructor = clazz.getConstructors()[0];
@@ -79,6 +73,41 @@ public class TestHashCodeAndEquals {
         List<Object> objs = new ArrayList<Object>();
         for ( int i = 0; i < parameterTypes.length; i++ ) {
             objs.add( constructor.newInstance( instantiateWithNullAt( parameterTypes, i ) ) );
+        }
+        return objs;
+    }
+
+    /**
+     * @return a list of pairs that are not object identical but should be equal
+     *         with null having been used for one of the constructor parameters
+     */
+    private List<ITuple2<Object, Object>> instantiatePairsWithNulls( Class<?> clazz ) throws Exception {
+        assert !mockClasses.containsKey( clazz );
+        Constructor<?> constructor = clazz.getConstructors()[0];
+        Class<?>[] parameterTypes = constructor.getParameterTypes();
+        List<ITuple2<Object, Object>> objs = new ArrayList<ITuple2<Object, Object>>();
+        for ( int i = 0; i < parameterTypes.length; i++ ) {
+            Object[] params = instantiateWithNullAt( parameterTypes, i );
+            objs.add( Tuples.<Object, Object> tuple2( constructor.newInstance( params ), constructor.newInstance( params ) ) );
+        }
+        return objs;
+    }
+
+    /**
+     * @return a list of pairs that are not object identical but should be equal
+     *         other than null having been used for one of the constructor
+     *         parameters
+     */
+    private List<ITuple2<Object, Object>> instantiatePairsWithOneSideNull( Class<?> clazz ) throws Exception {
+        assert !mockClasses.containsKey( clazz );
+        Constructor<?> constructor = clazz.getConstructors()[0];
+        Class<?>[] parameterTypes = constructor.getParameterTypes();
+        List<ITuple2<Object, Object>> objs = new ArrayList<ITuple2<Object, Object>>();
+        for ( int i = 0; i < parameterTypes.length; i++ ) {
+            Object[] params1 = instantiate( parameterTypes );
+            Object[] params2 = Arrays.copyOf( params1, params1.length );
+            params2[i] = null;
+            objs.add( Tuples.<Object, Object> tuple2( constructor.newInstance( params1 ), constructor.newInstance( params2 ) ) );
         }
         return objs;
     }
@@ -110,6 +139,15 @@ public class TestHashCodeAndEquals {
     }
 
     @Test
+    public void testToStringSmokeTest() throws Exception {
+        visitClasses( new IResponse1<Object>() {
+            public void respond( Object t ) {
+                t.toString();
+            }
+        } );
+    }
+
+    @Test
     public void testEqualsNull() throws Exception {
         visitClasses( new IResponse1<Object>() {
             public void respond( Object t ) {
@@ -137,30 +175,55 @@ public class TestHashCodeAndEquals {
     }
 
     @Test
-    public void testEqualsWithNullParamsOneSide() throws Exception {
+    public void testEqualsWithNullParamsOneSideButOtherParamsChange() throws Exception {
         visitClassesWithNullConstructorParamsOneSide( new IResponse2<Object, Object>() {
             public void respond( Object t, Object u ) {
-                assertFalse( t.equals( u ) );
+                assertNotEquals( t, u );
+                assertNotEquals( u, t );
             }
         } );
+    }
+
+    @Test
+    public void testEqualsWithNullParamsOneSideButOtherParamsDontChange() throws Exception {
+        for ( Class<?> clazz : classesToTest ) {
+            for ( ITuple2<Object, Object> t : instantiatePairsWithOneSideNull( clazz ) ) {
+                assertNotEquals( t._1(), t._2() );
+                assertNotEquals( t._2(), t._1() );
+            }
+        }
     }
 
     @Test
     public void testEqualsWithDiffConstructorParams() throws Exception {
         visitClassesWithDiffConstructorParams( new IResponse2<Object, Object>() {
             public void respond( Object t, Object u ) {
-                assertFalse( t.equals( u ) );
+                assertNotEquals( t, u );
+                assertNotEquals( u, t );
             }
         } );
     }
 
     @Test
-    public void testEqualsWithNullParamsBothSides() throws Exception {
-        visitClassesWithNullConstructorParamsBothSides( new IResponse2<Object, Object>() {
-            public void respond( Object t, Object u ) {
-                assertTrue( t.equals( u ) );
+    public void testEqualsWithNullParamsBothSidesButOtherParamsChange() throws Exception {
+        for ( Class<?> clazz : classesToTest ) {
+            List<Object> objsWithNulls1 = instantiateWithNulls( clazz );
+            List<Object> objsWithNulls2 = instantiateWithNulls( clazz );
+            for ( int i = 0; i < objsWithNulls1.size(); i++ ) {
+                assertNotEquals( objsWithNulls1.get( i ), objsWithNulls2.get( i ) );
+                assertNotEquals( objsWithNulls2.get( i ), objsWithNulls1.get( i ) );
             }
-        } );
+        }
+    }
+
+    @Test
+    public void testEqualsWithNullParamsBothSidesButOtherParamsDontChange() throws Exception {
+        for ( Class<?> clazz : classesToTest ) {
+            for ( ITuple2<Object, Object> t : instantiatePairsWithNulls( clazz ) ) {
+                assertEquals( t._1(), t._2() );
+                assertEquals( t._2(), t._1() );
+            }
+        }
     }
 
     @Test
@@ -184,11 +247,22 @@ public class TestHashCodeAndEquals {
     }
 
     @Test
-    public void testHashCodeWithNullParamsBothSides() throws Exception {
-        visitClassesWithNullConstructorParamsBothSides( new IResponse2<Object, Object>() {
-            public void respond( Object t, Object u ) {
-                assertEquals( t.hashCode(), u.hashCode() );
+    public void testHashCodeWithNullParamsBothSidesButOtherParamsChange() throws Exception {
+        for ( Class<?> clazz : classesToTest ) {
+            List<Object> objsWithNulls1 = instantiateWithNulls( clazz );
+            List<Object> objsWithNulls2 = instantiateWithNulls( clazz );
+            for ( int i = 0; i < objsWithNulls1.size(); i++ ) {
+                assertNotEquals( objsWithNulls1.get( i ).hashCode(), objsWithNulls2.get( i ).hashCode() );
             }
-        } );
+        }
+    }
+
+    @Test
+    public void testHashCodeWithNullParamsBothSidesButOtherParamsDontChange() throws Exception {
+        for ( Class<?> clazz : classesToTest ) {
+            for ( ITuple2<Object, Object> t : instantiatePairsWithNulls( clazz ) ) {
+                assertEquals( t._1().hashCode(), t._2().hashCode() );
+            }
+        }
     }
 }

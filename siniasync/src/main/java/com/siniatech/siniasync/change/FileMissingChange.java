@@ -53,6 +53,11 @@ public class FileMissingChange extends Change {
         return true;
     }
 
+    @Override
+    public String toString() {
+        return "{" + getClass().getSimpleName() + "," + missingFile + "," + missingInDirectory + "}";
+    }
+
     public void apply( final IProgressMonitor... monitors ) {
         try {
             final Path parent = missingFile.getParent();
