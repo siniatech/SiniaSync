@@ -59,6 +59,8 @@ public class FileMissingChange extends Change {
     }
 
     public void apply( final IProgressMonitor... monitors ) {
+        // TODO - handle null fields
+        // TODO - ensure all paths are absolute
         try {
             final Path parent = missingFile.getParent();
             walkFileTree( missingFile, Collections.EMPTY_SET, Integer.MAX_VALUE, new SimpleFileVisitor<Path>() {
@@ -80,7 +82,7 @@ public class FileMissingChange extends Change {
                 }
             } );
         } catch ( IOException e ) {
-            report( "Failed to copy " + missingFile.getFileName() + "\n" + e, monitors );
+            report( "Failed to copy " + missingFile + " to " + missingInDirectory + "\n" + e, monitors );
         }
     }
 
