@@ -75,10 +75,6 @@ public class FileContentsChange extends Change {
     }
 
     private Path moveTempOverOriginal( Path oldFile, Path tempCopy ) throws IOException {
-        System.out.println( isWritable( tempCopy ) );
-        System.out.println( isWritable( oldFile ) );
-        FileTime now = FileTime.fromMillis( System.currentTimeMillis() );
-        Files.setLastModifiedTime( oldFile, now );
         move( tempCopy, oldFile, ATOMIC_MOVE );
         return oldFile;
     }

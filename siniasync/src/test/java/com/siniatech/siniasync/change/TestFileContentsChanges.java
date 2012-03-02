@@ -6,7 +6,6 @@ import static java.nio.file.Files.*;
 import static org.junit.Assert.*;
 
 import java.io.File;
-import java.nio.file.FileSystems;
 import java.nio.file.Path;
 
 import org.junit.Ignore;
@@ -29,13 +28,9 @@ public class TestFileContentsChanges {
     @Test
     // SIF - Failing
     public void testOverwritesSimpleFile() throws Exception {
-        //        Path p1 = createFileWithContents( pathString( "f" ), "old" );
-        //        Path p2 = createFileWithContents( pathString( "g" ), "new" );
-        Path p1 = FileSystems.getDefault().getPath( new File( "f" ).getAbsolutePath() );
-        Path p2 = FileSystems.getDefault().getPath( new File( "g" ).getAbsolutePath() );
+        Path p1 = createFileWithContents( pathString( "f" ), "old" );
+        Path p2 = createFileWithContents( pathString( "g" ), "new" );
         assertNotEquals( sha1( p1 ), sha1( p2 ) );
-        System.out.println( isWritable( p1 ) );
-        System.out.println( isWritable( p2 ) );
         new FileContentsChange( p1, p2 ).apply( new SysoutProgressMonitor() );
         assertTrue( exists( p1 ) );
         assertTrue( exists( p2 ) );
