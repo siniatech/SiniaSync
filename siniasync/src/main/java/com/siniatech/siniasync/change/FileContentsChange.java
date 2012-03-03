@@ -86,6 +86,8 @@ public class FileContentsChange extends Change {
     }
 
     private ITuple2<Path, Path> determineNewestFile() throws IOException {
+    	System.out.println(getLastModifiedTime(p1));
+    	System.out.println(getLastModifiedTime(p2));
         if ( getLastModifiedTime( p1 ).compareTo( getLastModifiedTime( p2 ) ) > 0 ) {
             return tuple2( p2, p1 );
         } else {
