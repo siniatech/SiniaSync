@@ -1,13 +1,14 @@
 package com.siniatech.siniasync.change;
 
-import static com.siniatech.siniautils.fn.Tuples.*;
-import static java.nio.file.Files.*;
-import static java.nio.file.StandardCopyOption.*;
+import static com.siniatech.siniautils.fn.Tuples.tuple2;
+import static java.nio.file.Files.copy;
+import static java.nio.file.Files.getLastModifiedTime;
+import static java.nio.file.Files.isDirectory;
+import static java.nio.file.Files.move;
+import static java.nio.file.StandardCopyOption.ATOMIC_MOVE;
 
 import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.attribute.FileTime;
 
 import com.siniatech.siniasync.monitor.IProgressMonitor;
 import com.siniatech.siniautils.fn.ITuple2;
@@ -61,6 +62,10 @@ public class FileContentsChange extends Change {
         }
         try {
             ITuple2<Path, Path> oldAndNew = determineNewestFile();
+            if ( oldAndNew == null ) {
+                report( "Unable to determine newest file between " + p1 + " and " + p2, monitors );
+                return;
+            }
             Path oldFile = oldAndNew._1();
             Path newFile = oldAndNew._2();
             Path tempCopy = copyToTempLocation( oldFile, newFile );
@@ -86,9 +91,10 @@ public class FileContentsChange extends Change {
     }
 
     private ITuple2<Path, Path> determineNewestFile() throws IOException {
-    	System.out.println(getLastModifiedTime(p1));
-    	System.out.println(getLastModifiedTime(p2));
-        if ( getLastModifiedTime( p1 ).compareTo( getLastModifiedTime( p2 ) ) > 0 ) {
+        int comparison = getLastModifiedTime( p1 ).compareTo( getLastModifiedTime( p2 ) );
+        if ( comparison == 0 ) {
+            return null;
+        } else if ( comparison > 0 ) {
             return tuple2( p2, p1 );
         } else {
             return tuple2( p1, p2 );
