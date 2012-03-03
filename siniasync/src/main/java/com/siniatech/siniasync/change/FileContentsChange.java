@@ -1,11 +1,8 @@
 package com.siniatech.siniasync.change;
 
-import static com.siniatech.siniautils.fn.Tuples.tuple2;
-import static java.nio.file.Files.copy;
-import static java.nio.file.Files.getLastModifiedTime;
-import static java.nio.file.Files.isDirectory;
-import static java.nio.file.Files.move;
-import static java.nio.file.StandardCopyOption.ATOMIC_MOVE;
+import static com.siniatech.siniautils.fn.Tuples.*;
+import static java.nio.file.Files.*;
+import static java.nio.file.StandardCopyOption.*;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -55,11 +52,16 @@ public class FileContentsChange extends Change {
     }
 
     public void apply( IProgressMonitor... monitors ) {
-        // TODO - handle nulls
-        // TODO - ensure all paths are absolute
+        if ( p1 == null || p2 == null ) {
+            throw new IllegalStateException( getClass().getSimpleName() + " is not able to process null files." );
+        }
         if ( isDirectory( p1 ) || isDirectory( p2 ) ) {
             throw new IllegalStateException( getClass().getSimpleName() + " is not able to process directories." );
         }
+        if ( !p1.isAbsolute() || !p2.isAbsolute() ) {
+            throw new IllegalStateException( getClass().getSimpleName() + " can only handle absolute paths." );
+        }
+        Path tempCopy = null;
         try {
             ITuple2<Path, Path> oldAndNew = determineNewestFile();
             if ( oldAndNew == null ) {
@@ -68,15 +70,20 @@ public class FileContentsChange extends Change {
             }
             Path oldFile = oldAndNew._1();
             Path newFile = oldAndNew._2();
-            Path tempCopy = copyToTempLocation( oldFile, newFile );
+            tempCopy = copyToTempLocation( oldFile, newFile );
             Path finalFile = moveTempOverOriginal( oldFile, tempCopy );
             report( "Copied " + newFile + " to " + finalFile, monitors );
         } catch ( IOException e ) {
             report( "Failed to resolve changes between " + p1 + " and " + p2 + "\n" + e, monitors );
         } finally {
-            // delete the temp file if one exists
+            if ( tempCopy != null ) {
+                try {
+                    deleteIfExists( tempCopy );
+                } catch ( IOException e ) {
+                    report( "Failed to remove temporary file " + tempCopy + "\n" + e, monitors );
+                }
+            }
         }
-
     }
 
     private Path moveTempOverOriginal( Path oldFile, Path tempCopy ) throws IOException {
