@@ -31,11 +31,11 @@ public class TestFileContentsChanges {
             Path p2 = createFileWithContents( pathString( "g" ), "new" );
             setLastModifiedTime( p1, FileTime.fromMillis( System.currentTimeMillis() ) );
             setLastModifiedTime( p2, FileTime.fromMillis( System.currentTimeMillis() + 1000 ) );
-            assertNotEquals( sha1( p1 ), sha1( p2 ) );
+            assertNotEquals( sha( p1 ), sha( p2 ) );
             new FileContentsChange( p1, p2 ).apply();
             assertTrue( exists( p1 ) );
             assertTrue( exists( p2 ) );
-            assertEquals( sha1( p1 ), sha1( p2 ) );
+            assertEquals( sha( p1 ), sha( p2 ) );
             assertEquals( "new", getFileContents( p1 ) );
             assertEquals( "new", getFileContents( p2 ) );
         }
@@ -49,11 +49,11 @@ public class TestFileContentsChanges {
             Path p2 = createFileWithContents( pathString( "g" ), "new" );
             setLastModifiedTime( p1, FileTime.fromMillis( System.currentTimeMillis() ) );
             setLastModifiedTime( p2, FileTime.fromMillis( System.currentTimeMillis() + 1000 ) );
-            assertNotEquals( sha1( p1 ), sha1( p2 ) );
+            assertNotEquals( sha( p1 ), sha( p2 ) );
             new FileContentsChange( p2, p1 ).apply();
             assertTrue( exists( p1 ) );
             assertTrue( exists( p2 ) );
-            assertEquals( sha1( p1 ), sha1( p2 ) );
+            assertEquals( sha( p1 ), sha( p2 ) );
             assertEquals( "new", getFileContents( p1 ) );
             assertEquals( "new", getFileContents( p2 ) );
         }
@@ -66,11 +66,11 @@ public class TestFileContentsChanges {
         long now = System.currentTimeMillis();
         setLastModifiedTime( p1, FileTime.fromMillis( now ) );
         setLastModifiedTime( p2, FileTime.fromMillis( now ) );
-        assertNotEquals( sha1( p1 ), sha1( p2 ) );
+        assertNotEquals( sha( p1 ), sha( p2 ) );
         new FileContentsChange( p2, p1 ).apply();
         assertTrue( exists( p1 ) );
         assertTrue( exists( p2 ) );
-        assertNotEquals( sha1( p1 ), sha1( p2 ) );
+        assertNotEquals( sha( p1 ), sha( p2 ) );
         assertEquals( "old", getFileContents( p1 ) );
         assertEquals( "new", getFileContents( p2 ) );
     }

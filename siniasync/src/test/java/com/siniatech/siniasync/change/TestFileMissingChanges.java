@@ -31,7 +31,7 @@ public class TestFileMissingChanges {
         assertFalse( exists( res ) );
         new FileMissingChange( p, d ).apply();
         assertTrue( exists( res ) );
-        assertEquals( sha1( p ), sha1( res ) );
+        assertEquals( sha( p ), sha( res ) );
     }
 
     @Test
@@ -53,7 +53,7 @@ public class TestFileMissingChanges {
         assertFalse( exists( res ) );
         new FileMissingChange( d1, d2 ).apply();
         assertTrue( exists( res ) );
-        assertEquals( sha1( p ), sha1( res ) );
+        assertEquals( sha( p ), sha( res ) );
     }
 
     @Test
@@ -66,7 +66,7 @@ public class TestFileMissingChanges {
         assertFalse( exists( res ) );
         new FileMissingChange( d1, d2 ).apply();
         assertTrue( exists( res ) );
-        assertEquals( sha1( p ), sha1( res ) );
+        assertEquals( sha( p ), sha( res ) );
     }
 
     @Test

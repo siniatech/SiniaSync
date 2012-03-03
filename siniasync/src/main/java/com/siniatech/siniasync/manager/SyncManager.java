@@ -59,7 +59,7 @@ public class SyncManager {
     }
 
     private List<IChange> determineChangesToRegularFile( Path p1, Path p2 ) throws IOException, NoSuchAlgorithmException {
-        if ( sha1( p1 ).equals( sha1( p2 ) ) ) {
+        if ( sha( p1 ).equals( sha( p2 ) ) ) {
             return changeList();
         } else {
             return changeList( new FileContentsChange( p1, p2 ) );
