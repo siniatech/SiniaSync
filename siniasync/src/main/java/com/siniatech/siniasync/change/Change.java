@@ -6,7 +6,7 @@ public abstract class Change implements IChange {
 
     public void report( String msg, IProgressMonitor... monitors ) {
         for ( IProgressMonitor progressMonitor : monitors ) {
-            progressMonitor.report( msg );
+            progressMonitor.report( new ChangeReport(msg) );
         }
     }
 }

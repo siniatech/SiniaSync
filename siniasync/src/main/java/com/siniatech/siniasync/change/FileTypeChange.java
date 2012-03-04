@@ -45,6 +45,7 @@ public class FileTypeChange extends Change {
         return true;
     }
 
+    @Override
     public void apply( IProgressMonitor... monitors ) {
         report( "Skipping file type difference...", monitors );
     }

@@ -51,6 +51,7 @@ public class FileContentsChange extends Change {
         return true;
     }
 
+    @Override
     public void apply( IProgressMonitor... monitors ) {
         if ( p1 == null || p2 == null ) {
             throw new IllegalStateException( getClass().getSimpleName() + " is not able to process null files." );

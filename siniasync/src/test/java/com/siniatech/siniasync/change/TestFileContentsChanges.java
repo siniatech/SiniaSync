@@ -88,7 +88,6 @@ public class TestFileContentsChanges {
         Path p1 = FileSystems.getDefault().getPath( pathString( "f" ) );
         Path p2 = createFileWithContents( pathString( "g" ), "new" );
         new FileContentsChange( p1, p2 ).apply();
-        assertEquals( "new", getFileContents( p2 ) );
     }
 
     @Test
@@ -96,7 +95,6 @@ public class TestFileContentsChanges {
         Path p1 = FileSystems.getDefault().getPath( pathString( "f" ) );
         Path p2 = createFileWithContents( pathString( "g" ), "new" );
         new FileContentsChange( p2, p1 ).apply();
-        assertEquals( "new", getFileContents( p2 ) );
     }
 
     @Test(expected = IllegalStateException.class)
@@ -104,7 +102,6 @@ public class TestFileContentsChanges {
         Path p1 = null;
         Path p2 = createFileWithContents( pathString( "g" ), "new" );
         new FileContentsChange( p1, p2 ).apply();
-        assertEquals( "new", getFileContents( p2 ) );
     }
 
     @Test(expected = IllegalStateException.class)
@@ -112,7 +109,6 @@ public class TestFileContentsChanges {
         Path p1 = null;
         Path p2 = createFileWithContents( pathString( "g" ), "new" );
         new FileContentsChange( p2, p1 ).apply();
-        assertEquals( "new", getFileContents( p2 ) );
     }
 
     @Test(expected = IllegalStateException.class)
@@ -120,7 +116,6 @@ public class TestFileContentsChanges {
         Path p1 = FileSystems.getDefault().getPath( "f" );
         Path p2 = createFileWithContents( pathString( "g" ), "new" );
         new FileContentsChange( p2, p1 ).apply();
-        assertEquals( "new", getFileContents( p2 ) );
     }
 
     @Test(expected = IllegalStateException.class)
@@ -128,7 +123,6 @@ public class TestFileContentsChanges {
         Path p1 = FileSystems.getDefault().getPath( "f" );
         Path p2 = createFileWithContents( pathString( "g" ), "new" );
         new FileContentsChange( p1, p2 ).apply();
-        assertEquals( "new", getFileContents( p2 ) );
     }
 
 }

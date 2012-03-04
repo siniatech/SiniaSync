@@ -58,9 +58,17 @@ public class FileMissingChange extends Change {
         return "{" + getClass().getSimpleName() + "," + missingFile + "," + missingInDirectory + "}";
     }
 
+    @Override
     public void apply( final IProgressMonitor... monitors ) {
-        // TODO - handle null fields
-        // TODO - ensure all paths are absolute
+        if ( missingFile == null || missingInDirectory == null ) {
+            throw new IllegalStateException( getClass().getSimpleName() + " is not able to process null files." );
+        }
+        if ( !isDirectory( missingInDirectory ) ) {
+            throw new IllegalStateException( getClass().getSimpleName() + " requires a target directory." );
+        }
+        if ( !missingFile.isAbsolute() || !missingInDirectory.isAbsolute() ) {
+            throw new IllegalStateException( getClass().getSimpleName() + " can only handle absolute paths." );
+        }
         try {
             final Path parent = missingFile.getParent();
             walkFileTree( missingFile, Collections.EMPTY_SET, Integer.MAX_VALUE, new SimpleFileVisitor<Path>() {

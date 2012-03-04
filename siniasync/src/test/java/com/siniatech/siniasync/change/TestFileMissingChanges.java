@@ -82,21 +82,9 @@ public class TestFileMissingChanges {
     }
 
     @Test
-    public void testHandlesDodgyDirectory() throws Exception {
-        Path p = createFileWithContents( pathString( "f" ), "hello" );
-        Path d = FileSystems.getDefault().getPath( pathString( "d" ) );
-        Path res = FileSystems.getDefault().getPath( pathString( "d/f" ) );
-        assertFalse( exists( d ) );
-        assertFalse( exists( res ) );
-        new FileMissingChange( p, d ).apply();
-        assertFalse( exists( d ) );
-        assertFalse( exists( res ) );
-    }
-
-    @Test
     public void testReportsError() throws Exception {
-        Path p = createFileWithContents( pathString( "f" ), "hello" );
-        Path d = FileSystems.getDefault().getPath( pathString( "d" ) );
+        Path p = FileSystems.getDefault().getPath( pathString( "f" ) );
+        Path d = createDirectory( FileSystems.getDefault().getPath( pathString( "d" ) ) );
         CountingProgressMonitor monitor = new CountingProgressMonitor();
         new FileMissingChange( p, d ).apply( monitor );
         assertEquals( 1, monitor.getCount() );
@@ -122,4 +110,31 @@ public class TestFileMissingChanges {
         assertEquals( 3, monitor.getCount() );
     }
 
+    @Test(expected = IllegalStateException.class)
+    public void testHandlesNullLeft() throws Exception {
+        Path p1 = null;
+        Path p2 = createDirectory( FileSystems.getDefault().getPath( pathString( "d2" ) ) );
+        new FileMissingChange( p1, p2 ).apply();
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void testHandlesNullRight() throws Exception {
+        Path p1 = createFileWithContents( pathString( "f" ), "hello" );
+        Path p2 = null;
+        new FileMissingChange( p1, p2 ).apply();
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void testHandlesNonAbsoluteRight() throws Exception {
+        Path p1 = createFileWithContents( pathString( "f" ), "hello" );
+        Path p2 = createDirectory( FileSystems.getDefault().getPath( pathString( "d2" ) ) ).getFileName();
+        new FileMissingChange( p1, p2 ).apply();
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void testHandlesNonAbsoluteLeft() throws Exception {
+        Path p1 = FileSystems.getDefault().getPath( "f" );
+        Path p2 = createDirectory( FileSystems.getDefault().getPath( pathString( "d2" ) ) );
+        new FileMissingChange( p1, p2 ).apply();
+    }
 }
