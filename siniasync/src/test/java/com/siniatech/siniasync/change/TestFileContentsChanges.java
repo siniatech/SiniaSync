@@ -115,4 +115,20 @@ public class TestFileContentsChanges {
         assertEquals( "new", getFileContents( p2 ) );
     }
 
+    @Test(expected = IllegalStateException.class)
+    public void testHandlesNonAbsoluteRight() throws Exception {
+        Path p1 = FileSystems.getDefault().getPath( "f" );
+        Path p2 = createFileWithContents( pathString( "g" ), "new" );
+        new FileContentsChange( p2, p1 ).apply();
+        assertEquals( "new", getFileContents( p2 ) );
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void testHandlesNonAbsoluteLeft() throws Exception {
+        Path p1 = FileSystems.getDefault().getPath( "f" );
+        Path p2 = createFileWithContents( pathString( "g" ), "new" );
+        new FileContentsChange( p1, p2 ).apply();
+        assertEquals( "new", getFileContents( p2 ) );
+    }
+
 }
