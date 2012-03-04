@@ -50,12 +50,13 @@ public class SyncManager {
     }
 
     private Map<String, Path> extractFiles( Path p ) throws IOException {
-        Map<String, Path> files = new HashMap<String, Path>();
-        DirectoryStream<Path> ds = newDirectoryStream( p );
-        for ( Path path : ds ) {
-            files.put( path.getFileName().toString(), path );
+        try (DirectoryStream<Path> ds = newDirectoryStream( p )) {
+            Map<String, Path> files = new HashMap<String, Path>();
+            for ( Path path : ds ) {
+                files.put( path.getFileName().toString(), path );
+            }
+            return files;
         }
-        return files;
     }
 
     private List<IChange> determineChangesToRegularFile( Path p1, Path p2 ) throws IOException, NoSuchAlgorithmException {

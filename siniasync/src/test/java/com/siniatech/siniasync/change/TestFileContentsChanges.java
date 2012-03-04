@@ -24,39 +24,33 @@ public class TestFileContentsChanges {
     }
 
     @Test
-    // SIF - Fails on Windows
     public void testOverwritesSimpleFile() throws Exception {
-        if ( System.getProperty( "os.name" ).startsWith( "Linux" ) ) {
-            Path p1 = createFileWithContents( pathString( "f" ), "old" );
-            Path p2 = createFileWithContents( pathString( "g" ), "new" );
-            setLastModifiedTime( p1, FileTime.fromMillis( System.currentTimeMillis() ) );
-            setLastModifiedTime( p2, FileTime.fromMillis( System.currentTimeMillis() + 1000 ) );
-            assertNotEquals( sha( p1 ), sha( p2 ) );
-            new FileContentsChange( p1, p2 ).apply();
-            assertTrue( exists( p1 ) );
-            assertTrue( exists( p2 ) );
-            assertEquals( sha( p1 ), sha( p2 ) );
-            assertEquals( "new", getFileContents( p1 ) );
-            assertEquals( "new", getFileContents( p2 ) );
-        }
+        Path p1 = createFileWithContents( pathString( "f" ), "old" );
+        Path p2 = createFileWithContents( pathString( "g" ), "new" );
+        setLastModifiedTime( p1, FileTime.fromMillis( System.currentTimeMillis() ) );
+        setLastModifiedTime( p2, FileTime.fromMillis( System.currentTimeMillis() + 1000 ) );
+        assertNotEquals( sha( p1 ), sha( p2 ) );
+        new FileContentsChange( p1, p2 ).apply();
+        assertTrue( exists( p1 ) );
+        assertTrue( exists( p2 ) );
+        assertEquals( sha( p1 ), sha( p2 ) );
+        assertEquals( "new", getFileContents( p1 ) );
+        assertEquals( "new", getFileContents( p2 ) );
     }
 
     @Test
-    // SIF - Fails on Windows
     public void testKeepsNewestDespiteOrder() throws Exception {
-        if ( System.getProperty( "os.name" ).startsWith( "Linux" ) ) {
-            Path p1 = createFileWithContents( pathString( "f" ), "old" );
-            Path p2 = createFileWithContents( pathString( "g" ), "new" );
-            setLastModifiedTime( p1, FileTime.fromMillis( System.currentTimeMillis() ) );
-            setLastModifiedTime( p2, FileTime.fromMillis( System.currentTimeMillis() + 1000 ) );
-            assertNotEquals( sha( p1 ), sha( p2 ) );
-            new FileContentsChange( p2, p1 ).apply();
-            assertTrue( exists( p1 ) );
-            assertTrue( exists( p2 ) );
-            assertEquals( sha( p1 ), sha( p2 ) );
-            assertEquals( "new", getFileContents( p1 ) );
-            assertEquals( "new", getFileContents( p2 ) );
-        }
+        Path p1 = createFileWithContents( pathString( "f" ), "old" );
+        Path p2 = createFileWithContents( pathString( "g" ), "new" );
+        setLastModifiedTime( p1, FileTime.fromMillis( System.currentTimeMillis() ) );
+        setLastModifiedTime( p2, FileTime.fromMillis( System.currentTimeMillis() + 1000 ) );
+        assertNotEquals( sha( p1 ), sha( p2 ) );
+        new FileContentsChange( p2, p1 ).apply();
+        assertTrue( exists( p1 ) );
+        assertTrue( exists( p2 ) );
+        assertEquals( sha( p1 ), sha( p2 ) );
+        assertEquals( "new", getFileContents( p1 ) );
+        assertEquals( "new", getFileContents( p2 ) );
     }
 
     @Test
@@ -88,7 +82,7 @@ public class TestFileContentsChanges {
         Path d = createDirectory( FileSystems.getDefault().getPath( pathString( "d" ) ) );
         new FileContentsChange( d, p ).apply();
     }
-    
+
     @Test
     public void testHandlesDodgyFileLeft() throws Exception {
         Path p1 = FileSystems.getDefault().getPath( pathString( "f" ) );
@@ -96,7 +90,7 @@ public class TestFileContentsChanges {
         new FileContentsChange( p1, p2 ).apply();
         assertEquals( "new", getFileContents( p2 ) );
     }
-    
+
     @Test
     public void testHandlesDodgyFileRight() throws Exception {
         Path p1 = FileSystems.getDefault().getPath( pathString( "f" ) );
@@ -104,7 +98,7 @@ public class TestFileContentsChanges {
         new FileContentsChange( p2, p1 ).apply();
         assertEquals( "new", getFileContents( p2 ) );
     }
-    
+
     @Test(expected = IllegalStateException.class)
     public void testHandlesNullLeft() throws Exception {
         Path p1 = null;
@@ -112,7 +106,7 @@ public class TestFileContentsChanges {
         new FileContentsChange( p1, p2 ).apply();
         assertEquals( "new", getFileContents( p2 ) );
     }
-    
+
     @Test(expected = IllegalStateException.class)
     public void testHandlesNullRight() throws Exception {
         Path p1 = null;
@@ -120,7 +114,5 @@ public class TestFileContentsChanges {
         new FileContentsChange( p2, p1 ).apply();
         assertEquals( "new", getFileContents( p2 ) );
     }
-    
-    
 
 }

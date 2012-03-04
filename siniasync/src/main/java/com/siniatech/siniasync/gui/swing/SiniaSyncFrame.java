@@ -9,6 +9,7 @@ import javax.swing.AbstractAction;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 
 import com.siniatech.siniasync.change.IChange;
 import com.siniatech.siniasync.manager.SyncManager;
@@ -27,6 +28,7 @@ public class SiniaSyncFrame extends JFrame {
 
         JButton setSource = new JButton( "Set Source" );
         setSource.addActionListener( new AbstractAction() {
+            @Override
             public void actionPerformed( ActionEvent e ) {
                 JFileChooser sourceChooser = new JFileChooser();
                 sourceChooser.setFileSelectionMode( JFileChooser.DIRECTORIES_ONLY );
@@ -41,6 +43,7 @@ public class SiniaSyncFrame extends JFrame {
 
         JButton setTarget = new JButton( "Set Target" );
         setTarget.addActionListener( new AbstractAction() {
+            @Override
             public void actionPerformed( ActionEvent e ) {
                 JFileChooser targetChooser = new JFileChooser();
                 targetChooser.setFileSelectionMode( JFileChooser.DIRECTORIES_ONLY );
@@ -55,14 +58,17 @@ public class SiniaSyncFrame extends JFrame {
 
         JButton synchButton = new JButton( "Synch" );
         synchButton.addActionListener( new AbstractAction() {
+            @Override
             public void actionPerformed( ActionEvent e ) {
                 try {
                     List<IChange> changes = syncManager.determineChanges( source, target );
                     System.out.println( changes );
-                    for ( IChange change : changes ) {
-                        change.apply( new SysoutProgressMonitor() );
+                    int res = JOptionPane.showConfirmDialog( SiniaSyncFrame.this, "Proceed?" );
+                    if ( res == JOptionPane.YES_OPTION ) {
+                        for ( IChange change : changes ) {
+                            change.apply( new SysoutProgressMonitor() );
+                        }
                     }
-
                 } catch ( Exception e1 ) {
                     e1.printStackTrace();
                 }
