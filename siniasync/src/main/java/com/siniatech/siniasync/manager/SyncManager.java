@@ -14,6 +14,7 @@ import com.siniatech.siniasync.change.FileContentsChange;
 import com.siniatech.siniasync.change.FileMissingChange;
 import com.siniatech.siniasync.change.FileTypeChange;
 import com.siniatech.siniasync.change.IChange;
+import com.siniatech.siniasync.change.NoChange;
 import com.siniatech.siniautils.fn.IResponse1;
 
 public class SyncManager {
@@ -62,7 +63,9 @@ public class SyncManager {
     }
 
     private void determineChangesToRegularFile( Path p1, Path p2, IResponse1<IChange>... changeManagers ) throws IOException, NoSuchAlgorithmException {
-        if ( !sha( p1 ).equals( sha( p2 ) ) ) {
+        if ( sha( p1 ).equals( sha( p2 ) ) ) {
+            reportChange( new NoChange( p1, p2 ), changeManagers );
+        } else {
             reportChange( new FileContentsChange( p1, p2 ), changeManagers );
         }
     }

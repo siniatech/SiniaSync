@@ -17,6 +17,7 @@ import org.junit.Test;
 import com.siniatech.siniasync.change.FileContentsChange;
 import com.siniatech.siniasync.change.FileMissingChange;
 import com.siniatech.siniasync.change.FileTypeChange;
+import com.siniatech.siniasync.change.NoChange;
 import com.siniatech.siniautils.fn.IFunction0;
 import com.siniatech.siniautils.fn.IResponse1;
 import com.siniatech.siniautils.fn.IResponse2;
@@ -29,6 +30,7 @@ public class TestHashCodeAndEquals {
     private static List<Class> classesToTest = Arrays.<Class> asList( //
         FileMissingChange.class, //
         FileTypeChange.class, //
+        NoChange.class, //
         FileContentsChange.class //
         );
 

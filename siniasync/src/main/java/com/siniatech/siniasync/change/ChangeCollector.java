@@ -11,7 +11,9 @@ public class ChangeCollector implements IResponse1<IChange> {
 
     @Override
     public void respond( IChange change ) {
-        changes.add( change );
+        if ( ! ( change instanceof NoChange ) ) {
+            changes.add( change );
+        }
     }
 
     public List<IChange> getChanges() {
