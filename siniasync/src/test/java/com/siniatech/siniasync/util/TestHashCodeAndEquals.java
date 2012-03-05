@@ -39,6 +39,7 @@ public class TestHashCodeAndEquals {
 
     static {
         mockClasses.put( Path.class, new IFunction0<Path>() {
+            @Override
             public Path apply() {
                 return FileSystems.getDefault().getPath( "f" + seq++ );
             }
@@ -141,6 +142,7 @@ public class TestHashCodeAndEquals {
     @Test
     public void testToStringSmokeTest() throws Exception {
         visitClasses( new IResponse1<Object>() {
+            @Override
             public void respond( Object t ) {
                 t.toString();
             }
@@ -150,6 +152,7 @@ public class TestHashCodeAndEquals {
     @Test
     public void testEqualsNull() throws Exception {
         visitClasses( new IResponse1<Object>() {
+            @Override
             public void respond( Object t ) {
                 assertFalse( t.equals( null ) );
             }
@@ -159,6 +162,7 @@ public class TestHashCodeAndEquals {
     @Test
     public void testEqualsIdentity() throws Exception {
         visitClasses( new IResponse1<Object>() {
+            @Override
             public void respond( Object t ) {
                 assertTrue( t.equals( t ) );
             }
@@ -168,6 +172,7 @@ public class TestHashCodeAndEquals {
     @Test
     public void testEqualsOtherClass() throws Exception {
         visitClasses( new IResponse1<Object>() {
+            @Override
             public void respond( Object t ) {
                 assertFalse( t.equals( 1 ) );
             }
@@ -177,6 +182,7 @@ public class TestHashCodeAndEquals {
     @Test
     public void testEqualsWithNullParamsOneSideButOtherParamsChange() throws Exception {
         visitClassesWithNullConstructorParamsOneSide( new IResponse2<Object, Object>() {
+            @Override
             public void respond( Object t, Object u ) {
                 assertNotEquals( t, u );
                 assertNotEquals( u, t );
@@ -197,6 +203,7 @@ public class TestHashCodeAndEquals {
     @Test
     public void testEqualsWithDiffConstructorParams() throws Exception {
         visitClassesWithDiffConstructorParams( new IResponse2<Object, Object>() {
+            @Override
             public void respond( Object t, Object u ) {
                 assertNotEquals( t, u );
                 assertNotEquals( u, t );
@@ -229,6 +236,7 @@ public class TestHashCodeAndEquals {
     @Test
     public void testHashCode() throws Exception {
         visitClasses( new IResponse1<Object>() {
+            @Override
             public void respond( Object t ) {
                 assertNotEquals( 0, t.hashCode() );
                 assertNotEquals( 1, t.hashCode() );
@@ -240,6 +248,7 @@ public class TestHashCodeAndEquals {
     @Test
     public void testHashCodeWithNullParamsOneSide() throws Exception {
         visitClassesWithNullConstructorParamsOneSide( new IResponse2<Object, Object>() {
+            @Override
             public void respond( Object t, Object u ) {
                 assertNotEquals( t.hashCode(), u.hashCode() );
             }

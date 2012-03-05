@@ -22,7 +22,7 @@ public class SiniaSyncFrame extends JFrame {
     private SyncManager syncManager;
 
     public SiniaSyncFrame() {
-        getContentPane().setLayout( new GridLayout( 1, 3 ) );
+        getContentPane().setLayout( new GridLayout( 2, 3 ) );
 
         syncManager = new SyncManager();
 
@@ -61,7 +61,7 @@ public class SiniaSyncFrame extends JFrame {
             @Override
             public void actionPerformed( ActionEvent e ) {
                 try {
-                    List<IChange> changes = syncManager.determineChanges( source, target );
+                    List<IChange> changes = syncManager.determineChanges( source, target, new SysoutProgressMonitor() );
                     System.out.println( changes );
                     int res = JOptionPane.showConfirmDialog( SiniaSyncFrame.this, "Proceed?" );
                     if ( res == JOptionPane.YES_OPTION ) {

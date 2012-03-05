@@ -38,7 +38,6 @@ public class SyncManager {
         List<IChange> changes = new ArrayList<>();
         for ( String s : d1.keySet() ) {
             if ( d2.containsKey( s ) ) {
-                reportFileMissing( d1.get( s ), d2.get( s ), monitors );
                 changes.addAll( determineChanges( d1.get( s ), d2.get( s ), monitors ) );
             } else {
                 reportFileMissing( d1.get( s ), p2, monitors );
@@ -47,6 +46,7 @@ public class SyncManager {
         }
         for ( String s : d2.keySet() ) {
             if ( !d1.containsKey( s ) ) {
+                reportFileMissing( d2.get( s ), p1, monitors );
                 changes.add( new FileMissingChange( d2.get( s ), p1 ) );
             }
         }
