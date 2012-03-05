@@ -3,7 +3,6 @@ package com.siniatech.siniasync.gui.swing;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.nio.file.Path;
-import java.util.List;
 
 import javax.swing.AbstractAction;
 import javax.swing.JButton;
@@ -11,9 +10,11 @@ import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
+import com.siniatech.siniasync.change.ChangeCollector;
 import com.siniatech.siniasync.change.IChange;
 import com.siniatech.siniasync.manager.SyncManager;
 import com.siniatech.siniasync.monitor.SysoutProgressMonitor;
+import com.siniatech.siniautils.fn.IResponse1;
 
 public class SiniaSyncFrame extends JFrame {
 
@@ -61,11 +62,16 @@ public class SiniaSyncFrame extends JFrame {
             @Override
             public void actionPerformed( ActionEvent e ) {
                 try {
-                    List<IChange> changes = syncManager.determineChanges( source, target, new SysoutProgressMonitor() );
-                    System.out.println( changes );
+                    ChangeCollector changeCollector = new ChangeCollector();
+                    syncManager.determineChanges( source, target, changeCollector, new IResponse1<IChange>() {
+                        @Override
+                        public void respond( IChange t ) {
+                            System.out.println( "Found change: " + t );
+                        }
+                    } );
                     int res = JOptionPane.showConfirmDialog( SiniaSyncFrame.this, "Proceed?" );
                     if ( res == JOptionPane.YES_OPTION ) {
-                        for ( IChange change : changes ) {
+                        for ( IChange change : changeCollector.getChanges() ) {
                             change.apply( new SysoutProgressMonitor() );
                         }
                     }

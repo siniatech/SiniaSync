@@ -2,55 +2,53 @@ package com.siniatech.siniasync.manager;
 
 import static com.siniatech.siniautils.file.PathHelper.*;
 import static java.nio.file.Files.*;
-import static java.util.Arrays.*;
 
 import java.io.IOException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Path;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import com.siniatech.siniasync.change.FileContentsChange;
 import com.siniatech.siniasync.change.FileMissingChange;
 import com.siniatech.siniasync.change.FileTypeChange;
 import com.siniatech.siniasync.change.IChange;
-import com.siniatech.siniasync.monitor.IProgressMonitor;
+import com.siniatech.siniautils.fn.IResponse1;
 
 public class SyncManager {
 
-    public List<IChange> determineChanges( Path p1, Path p2, IProgressMonitor... monitors ) throws NoSuchAlgorithmException, IOException {
+    public void determineChanges( Path p1, Path p2, IResponse1<IChange>... changeManagers ) throws NoSuchAlgorithmException, IOException {
         if ( isRegularFile( p1 ) && isRegularFile( p2 ) ) {
-            return determineChangesToRegularFile( p1, p2, monitors );
+            determineChangesToRegularFile( p1, p2, changeManagers );
         } else if ( isDirectory( p1 ) && isDirectory( p2 ) ) {
-            return determineChangesToDirectory( p1, p2, monitors );
+            determineChangesToDirectory( p1, p2, changeManagers );
         } else {
-            reportFileTypeChange( p1, p2, monitors );
-            return changeList( new FileTypeChange( p1, p2 ) );
+            reportChange( new FileTypeChange( p1, p2 ), changeManagers );
         }
     }
 
-    private List<IChange> determineChangesToDirectory( Path p1, Path p2, IProgressMonitor... monitors ) throws IOException, NoSuchAlgorithmException {
+    private void reportChange( IChange change, IResponse1<IChange>... changeManagers ) {
+        for ( IResponse1<IChange> manager : changeManagers ) {
+            manager.respond( change );
+        }
+    }
+
+    private void determineChangesToDirectory( Path p1, Path p2, IResponse1<IChange>... changeManagers ) throws IOException, NoSuchAlgorithmException {
         Map<String, Path> d1 = extractFiles( p1 );
         Map<String, Path> d2 = extractFiles( p2 );
-        List<IChange> changes = new ArrayList<>();
         for ( String s : d1.keySet() ) {
             if ( d2.containsKey( s ) ) {
-                changes.addAll( determineChanges( d1.get( s ), d2.get( s ), monitors ) );
+                determineChanges( d1.get( s ), d2.get( s ), changeManagers );
             } else {
-                reportFileMissing( d1.get( s ), p2, monitors );
-                changes.add( new FileMissingChange( d1.get( s ), p2 ) );
+                reportChange( new FileMissingChange( d1.get( s ), p2 ), changeManagers );
             }
         }
         for ( String s : d2.keySet() ) {
             if ( !d1.containsKey( s ) ) {
-                reportFileMissing( d2.get( s ), p1, monitors );
-                changes.add( new FileMissingChange( d2.get( s ), p1 ) );
+                reportChange( new FileMissingChange( d2.get( s ), p1 ), changeManagers );
             }
         }
-        return changes;
     }
 
     private Map<String, Path> extractFiles( Path p ) throws IOException {
@@ -63,42 +61,10 @@ public class SyncManager {
         }
     }
 
-    private List<IChange> determineChangesToRegularFile( Path p1, Path p2, IProgressMonitor... monitors ) throws IOException, NoSuchAlgorithmException {
-        if ( sha( p1 ).equals( sha( p2 ) ) ) {
-            reportNoChange( p1, p2, monitors );
-            return changeList();
-        } else {
-            reportContentsChange( p1, p2, monitors );
-            return changeList( new FileContentsChange( p1, p2 ) );
+    private void determineChangesToRegularFile( Path p1, Path p2, IResponse1<IChange>... changeManagers ) throws IOException, NoSuchAlgorithmException {
+        if ( !sha( p1 ).equals( sha( p2 ) ) ) {
+            reportChange( new FileContentsChange( p1, p2 ), changeManagers );
         }
-    }
-
-    private void reportContentsChange( Path p1, Path p2, IProgressMonitor... monitors ) {
-        for ( IProgressMonitor monitor : monitors ) {
-            monitor.report( new SyncContentsChangeReport( p1, p2 ) );
-        }
-    }
-
-    private void reportNoChange( Path p1, Path p2, IProgressMonitor... monitors ) {
-        for ( IProgressMonitor monitor : monitors ) {
-            monitor.report( new SyncNoChangeReport( p1, p2 ) );
-        }
-    }
-
-    private void reportFileTypeChange( Path p1, Path p2, IProgressMonitor[] monitors ) {
-        for ( IProgressMonitor monitor : monitors ) {
-            monitor.report( new SyncTypeChangeReport( p1, p2 ) );
-        }
-    }
-
-    private void reportFileMissing( Path p1, Path p2, IProgressMonitor[] monitors ) {
-        for ( IProgressMonitor monitor : monitors ) {
-            monitor.report( new SyncFileMissingReport( p1, p2 ) );
-        }
-    }
-
-    static private List<IChange> changeList( IChange... change ) {
-        return asList( change );
     }
 
 }
