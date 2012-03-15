@@ -3,7 +3,6 @@ package com.siniatech.siniasync.gui.swing;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.nio.file.Path;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -11,13 +10,11 @@ import javax.swing.AbstractAction;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
-import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 
-import com.siniatech.siniasync.change.ChangeCollector;
-import com.siniatech.siniasync.change.IChange;
+import com.siniatech.siniasync.change.ChangeOrchestrator;
 import com.siniatech.siniasync.manager.SyncManager;
-import com.siniatech.siniasync.monitor.SysoutProgressMonitor;
+import com.siniatech.siniautils.fn.IResponse0;
 
 public class SiniaSyncFrame extends JFrame {
 
@@ -67,10 +64,10 @@ public class SiniaSyncFrame extends JFrame {
         synchButton.addActionListener( new AbstractAction() {
             @Override
             public void actionPerformed( ActionEvent e ) {
-                try {
-                    threadPool.submit( new Callable<Void>() {
-                        @Override
-                        public Void call() throws Exception {
+                threadPool.submit( new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
                             SwingUtilities.invokeLater( new Runnable() {
                                 @Override
                                 public void run() {
@@ -78,26 +75,27 @@ public class SiniaSyncFrame extends JFrame {
                                     synchReportPanel.startSynch();
                                 }
                             } );
-                            final ChangeCollector changeCollector = new ChangeCollector();
-                            syncManager.determineChanges( source, target, changeCollector, synchReportPanel.getSynchMonitor() );
-                            SwingUtilities.invokeLater( new Runnable() {
+                            IResponse0 atEnd = new IResponse0() {
                                 @Override
-                                public void run() {
-                                    int res = JOptionPane.showConfirmDialog( SiniaSyncFrame.this, "Proceed?" );
-                                    if ( res == JOptionPane.YES_OPTION ) {
-                                        for ( IChange change : changeCollector.getChanges() ) {
-                                            change.apply( new SysoutProgressMonitor() );
+                                public void respond() {
+                                    SwingUtilities.invokeLater( new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            synchButton.setEnabled( true );
+
                                         }
-                                    }
-                                    synchButton.setEnabled( true );
+                                    } );
                                 }
-                            } );
-                            return null;
+                            };
+                            final ChangeOrchestrator changeOrchestrator = new ChangeOrchestrator( threadPool, synchReportPanel.getChangeContext() );
+                            syncManager.determineChanges( source, target, changeOrchestrator, synchReportPanel.getSynchMonitor() );
+                            changeOrchestrator.setSynchComplete( atEnd );
+
+                        } catch ( Exception e1 ) {
+                            e1.printStackTrace();
                         }
-                    } );
-                } catch ( Exception e1 ) {
-                    e1.printStackTrace();
-                }
+                    }
+                } );
             }
         } );
         getContentPane().add( synchButton );

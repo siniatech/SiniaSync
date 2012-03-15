@@ -1,5 +1,6 @@
 package com.siniatech.siniasync.change;
 
+import static com.siniatech.siniasync.change.SimpleTestChangeContext.*;
 import static com.siniatech.siniautils.file.PathHelper.*;
 import static java.nio.file.Files.*;
 import static org.junit.Assert.*;
@@ -11,8 +12,6 @@ import java.nio.file.Path;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
-
-import com.siniatech.siniasync.monitor.CountingProgressMonitor;
 
 public class TestFileMissingChanges {
 
@@ -29,7 +28,7 @@ public class TestFileMissingChanges {
         Path d = createDirectory( FileSystems.getDefault().getPath( pathString( "d" ) ) );
         Path res = FileSystems.getDefault().getPath( pathString( "d/f" ) );
         assertFalse( exists( res ) );
-        new FileMissingChange( p, d ).apply();
+        new FileMissingChange( p, d ).respond( simpleTestChangeContext );
         assertTrue( exists( res ) );
         assertEquals( sha( p ), sha( res ) );
     }
@@ -40,7 +39,7 @@ public class TestFileMissingChanges {
         Path d2 = createDirectory( FileSystems.getDefault().getPath( pathString( "d2" ) ) );
         Path res = FileSystems.getDefault().getPath( pathString( "d2/d1" ) );
         assertFalse( exists( res ) );
-        new FileMissingChange( d1, d2 ).apply();
+        new FileMissingChange( d1, d2 ).respond( simpleTestChangeContext );
         assertTrue( exists( res ) );
     }
 
@@ -51,7 +50,7 @@ public class TestFileMissingChanges {
         Path p = createFileWithContents( pathString( "d1/f" ), "hello" );
         Path res = FileSystems.getDefault().getPath( pathString( "d2/d1/f" ) );
         assertFalse( exists( res ) );
-        new FileMissingChange( d1, d2 ).apply();
+        new FileMissingChange( d1, d2 ).respond( simpleTestChangeContext );
         assertTrue( exists( res ) );
         assertEquals( sha( p ), sha( res ) );
     }
@@ -64,7 +63,7 @@ public class TestFileMissingChanges {
         Path p = createFileWithContents( pathString( "d1/d3/f" ), "hello" );
         Path res = FileSystems.getDefault().getPath( pathString( "d2/d1/d3/f" ) );
         assertFalse( exists( res ) );
-        new FileMissingChange( d1, d2 ).apply();
+        new FileMissingChange( d1, d2 ).respond( simpleTestChangeContext );
         assertTrue( exists( res ) );
         assertEquals( sha( p ), sha( res ) );
     }
@@ -76,7 +75,7 @@ public class TestFileMissingChanges {
         Path res = FileSystems.getDefault().getPath( pathString( "d/f" ) );
         assertFalse( exists( p ) );
         assertFalse( exists( res ) );
-        new FileMissingChange( p, d ).apply();
+        new FileMissingChange( p, d ).respond( simpleTestChangeContext );
         assertFalse( exists( p ) );
         assertFalse( exists( res ) );
     }
@@ -85,56 +84,37 @@ public class TestFileMissingChanges {
     public void testReportsError() throws Exception {
         Path p = FileSystems.getDefault().getPath( pathString( "f" ) );
         Path d = createDirectory( FileSystems.getDefault().getPath( pathString( "d" ) ) );
-        CountingProgressMonitor monitor = new CountingProgressMonitor();
-        new FileMissingChange( p, d ).apply( monitor );
-        assertEquals( 1, monitor.getCount() );
-    }
-
-    @Test
-    public void testReportsSingleCopy() throws Exception {
-        Path p = createFileWithContents( pathString( "f" ), "hello" );
-        Path d = createDirectory( FileSystems.getDefault().getPath( pathString( "d" ) ) );
-        CountingProgressMonitor monitor = new CountingProgressMonitor();
-        new FileMissingChange( p, d ).apply( monitor );
-        assertEquals( 1, monitor.getCount() );
-    }
-
-    @Test
-    public void testReportsMultipleCopies() throws Exception {
-        Path d1 = createDirectory( FileSystems.getDefault().getPath( pathString( "d1" ) ) );
-        Path d2 = createDirectory( FileSystems.getDefault().getPath( pathString( "d2" ) ) );
-        createDirectory( FileSystems.getDefault().getPath( pathString( "d1/d3" ) ) );
-        createFileWithContents( pathString( "d1/d3/f" ), "hello" );
-        CountingProgressMonitor monitor = new CountingProgressMonitor();
-        new FileMissingChange( d1, d2 ).apply( monitor );
-        assertEquals( 3, monitor.getCount() );
+        CountingTestChangeContext changeContext = new CountingTestChangeContext();
+        new FileMissingChange( p, d ).respond( changeContext );
+        assertEquals( 1, changeContext.getErrorCount() );
+        assertEquals( 0, changeContext.getSuccessCount() );
     }
 
     @Test(expected = IllegalStateException.class)
     public void testHandlesNullLeft() throws Exception {
         Path p1 = null;
         Path p2 = createDirectory( FileSystems.getDefault().getPath( pathString( "d2" ) ) );
-        new FileMissingChange( p1, p2 ).apply();
+        new FileMissingChange( p1, p2 ).respond( simpleTestChangeContext );
     }
 
     @Test(expected = IllegalStateException.class)
     public void testHandlesNullRight() throws Exception {
         Path p1 = createFileWithContents( pathString( "f" ), "hello" );
         Path p2 = null;
-        new FileMissingChange( p1, p2 ).apply();
+        new FileMissingChange( p1, p2 ).respond( simpleTestChangeContext );
     }
 
     @Test(expected = IllegalStateException.class)
     public void testHandlesNonAbsoluteRight() throws Exception {
         Path p1 = createFileWithContents( pathString( "f" ), "hello" );
         Path p2 = createDirectory( FileSystems.getDefault().getPath( pathString( "d2" ) ) ).getFileName();
-        new FileMissingChange( p1, p2 ).apply();
+        new FileMissingChange( p1, p2 ).respond( simpleTestChangeContext );
     }
 
     @Test(expected = IllegalStateException.class)
     public void testHandlesNonAbsoluteLeft() throws Exception {
         Path p1 = FileSystems.getDefault().getPath( "f" );
         Path p2 = createDirectory( FileSystems.getDefault().getPath( pathString( "d2" ) ) );
-        new FileMissingChange( p1, p2 ).apply();
+        new FileMissingChange( p1, p2 ).respond( simpleTestChangeContext );
     }
 }

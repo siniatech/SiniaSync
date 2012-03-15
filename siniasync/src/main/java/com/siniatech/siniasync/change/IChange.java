@@ -1,9 +1,7 @@
 package com.siniatech.siniasync.change;
 
-import com.siniatech.siniasync.monitor.IProgressMonitor;
+import com.siniatech.siniautils.fn.IResponse1;
 
-public interface IChange {
-
-    void apply( IProgressMonitor... monitors );
+public interface IChange extends IResponse1<IChangeContext> {
 
 }

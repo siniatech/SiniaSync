@@ -2,8 +2,6 @@ package com.siniatech.siniasync.change;
 
 import java.nio.file.Path;
 
-import com.siniatech.siniasync.monitor.IProgressMonitor;
-
 public class FileTypeChange extends Change {
 
     private final Path p1;
@@ -46,8 +44,7 @@ public class FileTypeChange extends Change {
     }
 
     @Override
-    public void apply( IProgressMonitor... monitors ) {
-        report( "Skipping file type difference...", monitors );
+    public void respond( IChangeContext changeContext ) {
     }
 
 }

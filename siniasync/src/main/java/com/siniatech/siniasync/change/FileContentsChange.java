@@ -7,7 +7,6 @@ import static java.nio.file.StandardCopyOption.*;
 import java.io.IOException;
 import java.nio.file.Path;
 
-import com.siniatech.siniasync.monitor.IProgressMonitor;
 import com.siniatech.siniautils.fn.ITuple2;
 
 public class FileContentsChange extends Change {
@@ -52,7 +51,7 @@ public class FileContentsChange extends Change {
     }
 
     @Override
-    public void apply( IProgressMonitor... monitors ) {
+    public void respond( IChangeContext changeContext ) {
         if ( p1 == null || p2 == null ) {
             throw new IllegalStateException( getClass().getSimpleName() + " is not able to process null files." );
         }
@@ -66,22 +65,22 @@ public class FileContentsChange extends Change {
         try {
             ITuple2<Path, Path> oldAndNew = determineNewestFile();
             if ( oldAndNew == null ) {
-                report( "Unable to determine newest file between " + p1 + " and " + p2, monitors );
+                changeContext.reportError( "Unable to determine newest file between " + p1 + " and " + p2 );
                 return;
             }
             Path oldFile = oldAndNew._1();
             Path newFile = oldAndNew._2();
             tempCopy = copyToTempLocation( oldFile, newFile );
             Path finalFile = moveTempOverOriginal( oldFile, tempCopy );
-            report( "Copied " + newFile + " to " + finalFile, monitors );
+            changeContext.reportSuccess( "Copied " + newFile + " to " + finalFile );
         } catch ( IOException e ) {
-            report( "Failed to resolve changes between " + p1 + " and " + p2 + "\n" + e, monitors );
+            changeContext.reportError( "Failed to resolve changes between " + p1 + " and " + p2 + "\n" + e );
         } finally {
             if ( tempCopy != null ) {
                 try {
                     deleteIfExists( tempCopy );
                 } catch ( IOException e ) {
-                    report( "Failed to remove temporary file " + tempCopy + "\n" + e, monitors );
+                    changeContext.reportError( "Failed to remove temporary file " + tempCopy + "\n" + e );
                 }
             }
         }

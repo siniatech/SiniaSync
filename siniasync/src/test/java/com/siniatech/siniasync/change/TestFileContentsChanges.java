@@ -1,6 +1,7 @@
 package com.siniatech.siniasync.change;
 
 import static com.siniatech.siniautils.file.PathHelper.*;
+import static com.siniatech.siniasync.change.SimpleTestChangeContext.*;
 import static com.siniatech.siniautils.test.AssertHelper.*;
 import static java.nio.file.Files.*;
 import static org.junit.Assert.*;
@@ -30,7 +31,7 @@ public class TestFileContentsChanges {
         setLastModifiedTime( p1, FileTime.fromMillis( System.currentTimeMillis() ) );
         setLastModifiedTime( p2, FileTime.fromMillis( System.currentTimeMillis() + 1000 ) );
         assertNotEquals( sha( p1 ), sha( p2 ) );
-        new FileContentsChange( p1, p2 ).apply();
+        new FileContentsChange( p1, p2 ).respond( simpleTestChangeContext );
         assertTrue( exists( p1 ) );
         assertTrue( exists( p2 ) );
         assertEquals( sha( p1 ), sha( p2 ) );
@@ -45,7 +46,7 @@ public class TestFileContentsChanges {
         setLastModifiedTime( p1, FileTime.fromMillis( System.currentTimeMillis() ) );
         setLastModifiedTime( p2, FileTime.fromMillis( System.currentTimeMillis() + 1000 ) );
         assertNotEquals( sha( p1 ), sha( p2 ) );
-        new FileContentsChange( p2, p1 ).apply();
+        new FileContentsChange( p2, p1 ).respond( simpleTestChangeContext );
         assertTrue( exists( p1 ) );
         assertTrue( exists( p2 ) );
         assertEquals( sha( p1 ), sha( p2 ) );
@@ -61,7 +62,7 @@ public class TestFileContentsChanges {
         setLastModifiedTime( p1, FileTime.fromMillis( now ) );
         setLastModifiedTime( p2, FileTime.fromMillis( now ) );
         assertNotEquals( sha( p1 ), sha( p2 ) );
-        new FileContentsChange( p2, p1 ).apply();
+        new FileContentsChange( p2, p1 ).respond( simpleTestChangeContext );
         assertTrue( exists( p1 ) );
         assertTrue( exists( p2 ) );
         assertNotEquals( sha( p1 ), sha( p2 ) );
@@ -73,56 +74,56 @@ public class TestFileContentsChanges {
     public void testBalksAtDirectoriesRight() throws Exception {
         Path p = createFileWithContents( pathString( "f" ), "hello" );
         Path d = createDirectory( FileSystems.getDefault().getPath( pathString( "d" ) ) );
-        new FileContentsChange( p, d ).apply();
+        new FileContentsChange( p, d ).respond( simpleTestChangeContext );
     }
 
     @Test(expected = IllegalStateException.class)
     public void testBalksAtDirectoriesLeft() throws Exception {
         Path p = createFileWithContents( pathString( "f" ), "hello" );
         Path d = createDirectory( FileSystems.getDefault().getPath( pathString( "d" ) ) );
-        new FileContentsChange( d, p ).apply();
+        new FileContentsChange( d, p ).respond( simpleTestChangeContext );
     }
 
     @Test
     public void testHandlesDodgyFileLeft() throws Exception {
         Path p1 = FileSystems.getDefault().getPath( pathString( "f" ) );
         Path p2 = createFileWithContents( pathString( "g" ), "new" );
-        new FileContentsChange( p1, p2 ).apply();
+        new FileContentsChange( p1, p2 ).respond( simpleTestChangeContext );
     }
 
     @Test
     public void testHandlesDodgyFileRight() throws Exception {
         Path p1 = FileSystems.getDefault().getPath( pathString( "f" ) );
         Path p2 = createFileWithContents( pathString( "g" ), "new" );
-        new FileContentsChange( p2, p1 ).apply();
+        new FileContentsChange( p2, p1 ).respond( simpleTestChangeContext );
     }
 
     @Test(expected = IllegalStateException.class)
     public void testHandlesNullLeft() throws Exception {
         Path p1 = null;
         Path p2 = createFileWithContents( pathString( "g" ), "new" );
-        new FileContentsChange( p1, p2 ).apply();
+        new FileContentsChange( p1, p2 ).respond( simpleTestChangeContext );
     }
 
     @Test(expected = IllegalStateException.class)
     public void testHandlesNullRight() throws Exception {
         Path p1 = null;
         Path p2 = createFileWithContents( pathString( "g" ), "new" );
-        new FileContentsChange( p2, p1 ).apply();
+        new FileContentsChange( p2, p1 ).respond( simpleTestChangeContext );
     }
 
     @Test(expected = IllegalStateException.class)
     public void testHandlesNonAbsoluteRight() throws Exception {
         Path p1 = FileSystems.getDefault().getPath( "f" );
         Path p2 = createFileWithContents( pathString( "g" ), "new" );
-        new FileContentsChange( p2, p1 ).apply();
+        new FileContentsChange( p2, p1 ).respond( simpleTestChangeContext );
     }
 
     @Test(expected = IllegalStateException.class)
     public void testHandlesNonAbsoluteLeft() throws Exception {
         Path p1 = FileSystems.getDefault().getPath( "f" );
         Path p2 = createFileWithContents( pathString( "g" ), "new" );
-        new FileContentsChange( p1, p2 ).apply();
+        new FileContentsChange( p1, p2 ).respond( simpleTestChangeContext );
     }
 
 }

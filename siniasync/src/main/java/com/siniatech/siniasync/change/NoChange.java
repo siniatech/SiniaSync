@@ -2,8 +2,6 @@ package com.siniatech.siniasync.change;
 
 import java.nio.file.Path;
 
-import com.siniatech.siniasync.monitor.IProgressMonitor;
-
 public class NoChange implements IChange {
 
     private final Path p1;
@@ -46,12 +44,12 @@ public class NoChange implements IChange {
     }
 
     @Override
-    public void apply( IProgressMonitor... monitors ) {
-    }
-
-    @Override
     public String toString() {
         return "{" + getClass().getSimpleName() + "," + p1 + "," + p2 + "}";
     }
-    
+
+    @Override
+    public void respond( IChangeContext changeContext ) {
+    }
+
 }

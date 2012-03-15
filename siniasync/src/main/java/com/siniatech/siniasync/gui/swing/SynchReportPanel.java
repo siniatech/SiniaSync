@@ -13,6 +13,7 @@ import com.siniatech.siniasync.change.FileContentsChange;
 import com.siniatech.siniasync.change.FileMissingChange;
 import com.siniatech.siniasync.change.FileTypeChange;
 import com.siniatech.siniasync.change.IChange;
+import com.siniatech.siniasync.change.IChangeContext;
 import com.siniatech.siniautils.fn.IResponse1;
 
 public class SynchReportPanel extends JComponent {
@@ -108,6 +109,10 @@ public class SynchReportPanel extends JComponent {
         noOfFileTypeChanges = 0L;
         synchStart = System.currentTimeMillis();
         updateView();
+    }
+
+    public IChangeContext getChangeContext() {
+        return null;
     }
 
 }

@@ -10,8 +10,6 @@ import java.nio.file.SimpleFileVisitor;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.Collections;
 
-import com.siniatech.siniasync.monitor.IProgressMonitor;
-
 public class FileMissingChange extends Change {
 
     private final Path missingFile;
@@ -59,7 +57,7 @@ public class FileMissingChange extends Change {
     }
 
     @Override
-    public void apply( final IProgressMonitor... monitors ) {
+    public void respond( IChangeContext changeContext ) {
         if ( missingFile == null || missingInDirectory == null ) {
             throw new IllegalStateException( getClass().getSimpleName() + " is not able to process null files." );
         }
@@ -74,23 +72,22 @@ public class FileMissingChange extends Change {
             walkFileTree( missingFile, Collections.EMPTY_SET, Integer.MAX_VALUE, new SimpleFileVisitor<Path>() {
                 @Override
                 public FileVisitResult preVisitDirectory( Path dir, BasicFileAttributes attrs ) throws IOException {
-                    return copyAndReport( dir, monitors );
+                    return doCopy( dir );
                 }
 
                 @Override
                 public FileVisitResult visitFile( Path file, BasicFileAttributes attrs ) throws IOException {
-                    return copyAndReport( file, monitors );
+                    return doCopy( file );
                 }
 
-                private FileVisitResult copyAndReport( Path file, final IProgressMonitor... monitors ) throws IOException {
+                private FileVisitResult doCopy( Path file ) throws IOException {
                     Path target = missingInDirectory.resolve( parent.relativize( file ) );
                     copy( file, target );
-                    report( "Copied " + file + " to " + target, monitors );
                     return CONTINUE;
                 }
             } );
         } catch ( IOException e ) {
-            report( "Failed to copy " + missingFile + " to " + missingInDirectory + "\n" + e, monitors );
+            changeContext.reportError( "Failed to copy " + missingFile + " to " + missingInDirectory + "\n" + e );
         }
     }
 
