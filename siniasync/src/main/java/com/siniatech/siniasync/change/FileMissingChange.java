@@ -57,7 +57,7 @@ public class FileMissingChange extends Change {
     }
 
     @Override
-    public void respond( IChangeContext changeContext ) {
+    public void respond( final IChangeContext changeContext ) {
         if ( missingFile == null || missingInDirectory == null ) {
             throw new IllegalStateException( getClass().getSimpleName() + " is not able to process null files." );
         }
@@ -82,6 +82,7 @@ public class FileMissingChange extends Change {
 
                 private FileVisitResult doCopy( Path file ) throws IOException {
                     Path target = missingInDirectory.resolve( parent.relativize( file ) );
+                    changeContext.reportSuccess( "Copied " + missingFile + " to " + missingInDirectory );
                     copy( file, target );
                     return CONTINUE;
                 }

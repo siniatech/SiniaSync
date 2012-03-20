@@ -33,8 +33,10 @@ public class SynchReportPanel extends JComponent {
     private long synchStart;
 
     private IResponse1<IChange> synchMonitor;
+    private final IChangeContext changeContext;
 
-    public SynchReportPanel() {
+    public SynchReportPanel(IChangeContext changeContext) {
+        this.changeContext = changeContext;
         setLayout( new BorderLayout() );
 
         synchMonitor = createSynchMonitor();
@@ -60,6 +62,7 @@ public class SynchReportPanel extends JComponent {
         numbersPanel.add( noOfFileTypeChangesLabel );
 
         add( numbersPanel, BorderLayout.CENTER );
+        
     }
 
     private IResponse1<IChange> createSynchMonitor() {
@@ -112,7 +115,7 @@ public class SynchReportPanel extends JComponent {
     }
 
     public IChangeContext getChangeContext() {
-        return null;
+        return changeContext;
     }
 
 }

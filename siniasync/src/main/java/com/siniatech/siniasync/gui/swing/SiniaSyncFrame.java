@@ -16,6 +16,10 @@ import javax.swing.SwingUtilities;
 
 import com.siniatech.dokz.DokzContainer;
 import com.siniatech.siniasync.change.ChangeOrchestrator;
+import com.siniatech.siniasync.change.ChangeQueueingStrategy;
+import com.siniatech.siniasync.change.IChange;
+import com.siniatech.siniasync.change.IChangeContext;
+import com.siniatech.siniasync.change.NoChange;
 import com.siniatech.siniasync.manager.SyncManager;
 import com.siniatech.siniautils.fn.IResponse0;
 
@@ -37,7 +41,7 @@ public class SiniaSyncFrame extends JFrame {
         panel.setLayout( new GridLayout( 2, 3 ) );
         dokzContainer.add( panel, "Synch" );
 
-        JPanel loggingPanel = new JPanel();
+        final LoggingPanel loggingPanel = new LoggingPanel();
         dokzContainer.add( loggingPanel, "Log" );
 
         syncManager = new SyncManager();
@@ -51,7 +55,7 @@ public class SiniaSyncFrame extends JFrame {
                 int res = sourceChooser.showOpenDialog( SiniaSyncFrame.this );
                 if ( res == JFileChooser.APPROVE_OPTION ) {
                     source = sourceChooser.getSelectedFile().toPath();
-                    System.out.println( source );
+                    loggingPanel.reportInfo( "Source path:" + source );
                 }
             }
         } );
@@ -66,13 +70,28 @@ public class SiniaSyncFrame extends JFrame {
                 int res = targetChooser.showOpenDialog( SiniaSyncFrame.this );
                 if ( res == JFileChooser.APPROVE_OPTION ) {
                     target = targetChooser.getSelectedFile().toPath();
-                    System.out.println( target );
+                    loggingPanel.reportInfo( "Target path:" + target );
                 }
             }
         } );
         panel.add( setTarget );
 
-        final SynchReportPanel synchReportPanel = new SynchReportPanel();
+        final SynchReportPanel synchReportPanel = new SynchReportPanel( new IChangeContext() {
+            @Override
+            public void reportSuccess( String string ) {
+                loggingPanel.reportInfo( string );
+            }
+
+            @Override
+            public void reportError( String string ) {
+                loggingPanel.reportError( string );
+            }
+
+            @Override
+            public ChangeQueueingStrategy getChangeQueueingStrategy( IChange change ) {
+                return change instanceof NoChange ? ChangeQueueingStrategy.doNothing : ChangeQueueingStrategy.apply;
+            }
+        } );
         final JButton synchButton = new JButton( "Synch" );
         synchButton.addActionListener( new AbstractAction() {
             @Override
