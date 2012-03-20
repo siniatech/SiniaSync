@@ -1,5 +1,6 @@
 package com.siniatech.siniasync.gui.swing;
 
+import java.awt.BorderLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.nio.file.Path;
@@ -10,8 +11,10 @@ import javax.swing.AbstractAction;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
+import com.siniatech.dokz.DokzContainer;
 import com.siniatech.siniasync.change.ChangeOrchestrator;
 import com.siniatech.siniasync.manager.SyncManager;
 import com.siniatech.siniautils.fn.IResponse0;
@@ -25,7 +28,17 @@ public class SiniaSyncFrame extends JFrame {
     public SiniaSyncFrame() {
         final ExecutorService threadPool = Executors.newCachedThreadPool();
 
-        getContentPane().setLayout( new GridLayout( 2, 3 ) );
+        getContentPane().setLayout( new BorderLayout() );
+
+        DokzContainer dokzContainer = new DokzContainer();
+        getContentPane().add( dokzContainer.asJComponent() );
+
+        JPanel panel = new JPanel();
+        panel.setLayout( new GridLayout( 2, 3 ) );
+        dokzContainer.add( panel, "Synch" );
+
+        JPanel loggingPanel = new JPanel();
+        dokzContainer.add( loggingPanel, "Log" );
 
         syncManager = new SyncManager();
 
@@ -42,7 +55,7 @@ public class SiniaSyncFrame extends JFrame {
                 }
             }
         } );
-        getContentPane().add( setSource );
+        panel.add( setSource );
 
         JButton setTarget = new JButton( "Set Target" );
         setTarget.addActionListener( new AbstractAction() {
@@ -57,7 +70,7 @@ public class SiniaSyncFrame extends JFrame {
                 }
             }
         } );
-        getContentPane().add( setTarget );
+        panel.add( setTarget );
 
         final SynchReportPanel synchReportPanel = new SynchReportPanel();
         final JButton synchButton = new JButton( "Synch" );
@@ -98,8 +111,8 @@ public class SiniaSyncFrame extends JFrame {
                 } );
             }
         } );
-        getContentPane().add( synchButton );
-        getContentPane().add( synchReportPanel );
+        panel.add( synchButton );
+        panel.add( synchReportPanel );
         setSize( 800, 600 );
         setVisible( true );
         setDefaultCloseOperation( JFrame.EXIT_ON_CLOSE );
