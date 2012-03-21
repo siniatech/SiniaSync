@@ -24,7 +24,9 @@ public class LoggingPanel extends JPanel {
         setLayout( new BorderLayout() );
         loggingPane = new JTextPane();
         loggingPane.setEditable( false );
-        add( new JScrollPane( loggingPane ), BorderLayout.CENTER );
+        JPanel noWrapPanel = new JPanel( new BorderLayout() );
+        noWrapPanel.add( loggingPane, BorderLayout.CENTER );
+        add( new JScrollPane( noWrapPanel ), BorderLayout.CENTER );
 
         errorStyle = loggingPane.addStyle( "ERROR_STYLE", null );
         errorStyle.addAttribute( StyleConstants.Bold, Boolean.TRUE );
@@ -58,6 +60,7 @@ public class LoggingPanel extends JPanel {
                     sb.append( msg );
                     sb.append( "\n" );
                     doc.insertString( doc.getLength(), sb.toString(), style );
+                    loggingPane.setCaretPosition( doc.getLength() );
                 } catch ( BadLocationException e ) {
                     e.printStackTrace();
                 }
