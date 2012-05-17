@@ -1,7 +1,7 @@
 package com.siniatech.siniasync.manager;
 
+import static com.siniatech.siniautils.collection.ListHelper.*;
 import static com.siniatech.siniautils.file.PathHelper.*;
-import static com.siniatech.siniautils.list.ListHelper.*;
 import static java.nio.file.Files.*;
 import static org.junit.Assert.*;
 

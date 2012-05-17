@@ -14,7 +14,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
-import com.siniatech.dokz.DokzContainer;
+import com.siniatech.dokz.DokzManager;
 import com.siniatech.siniasync.change.ChangeOrchestrator;
 import com.siniatech.siniasync.change.ChangeQueueingStrategy;
 import com.siniatech.siniasync.change.IChange;
@@ -34,7 +34,7 @@ public class SiniaSyncFrame extends JFrame {
 
         getContentPane().setLayout( new BorderLayout() );
 
-        DokzContainer dokzContainer = new DokzContainer();
+        DokzManager dokzContainer = new DokzManager();
         getContentPane().add( dokzContainer.asJComponent() );
 
         JPanel panel = new JPanel();
